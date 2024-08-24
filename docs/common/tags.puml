@@ -1,0 +1,11 @@
+@startuml
+
+!include ../common/C4_Container.puml
+
+AddElementTag("v1.0", $borderColor="#d73027")
+AddElementTag("v1.1", $fontColor="#d73027")
+AddElementTag("notimplemented", $fontColor="red")
+AddElementTag("backup", $fontColor="orange")
+AddRelTag("backup", $textColor="orange", $lineColor="orange", $lineStyle = DashedLine())
+
+@enduml

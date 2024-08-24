@@ -1,0 +1,21 @@
+@startuml
+!include ./common/C4_Context.puml
+!include ./common/C4_Container.puml
+
+title Context
+
+Person(user, "Users")
+
+Boundary(home_controller, "Home Controller", "Domen") {
+    Container(heating_control, "Heating Controller", "Context", "Heating controller [Java]")
+    Container(temperature_monitoring, "Heating Service", "Context", "handle temperature info [Java]")
+}
+
+ContainerDb(db, "Database", "Postgresql")
+
+
+Rel(user, heating_control, "Requests", "http/https")
+Rel(heating_control, temperature_monitoring, "Temperature info")
+Rel(temperature_monitoring, db, "Read/Write Heating System Info", "tcp:5432")
+
+@enduml

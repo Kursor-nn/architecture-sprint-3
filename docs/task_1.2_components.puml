@@ -1,0 +1,67 @@
+@startuml
+!include ./common/C4_Context.puml
+!include ./common/C4_Container.puml
+!include ./common/C4_Component.puml
+
+title System Descriptor
+
+AddRelTag("read", $lineColor="#00e600", $legendText="Write")
+AddRelTag("write", $lineColor="#ff3333", $legendText="Read")
+AddRelTag("read_write", $lineColor="black", $legendText="Read/Write")
+
+Container_Ext(ext_dev, "External Devices")
+Container_Ext(user_api, "User API", "Java/ReactJS")
+
+
+Boundary(input_adapter_family, "Group of input adapters", "Domen") {
+    Component(c_sensor_input, "Input Adapter", "Java", "Handle input data from devices")
+}
+
+ContainerQueue_Ext(kafka, "Databus", "Kafka Cluster", "Store and transport messages to services")
+
+Component(api_gateway, "API Gateway", "Nginx/Kong", "API Gateway")
+
+Boundary(system_info_service_family, "Group of system info services", "Domen") {
+    Component(system_info_service, "System Info Handler", "Java", "Validate, Handle and provide system data for user via user api")
+}
+
+Boundary(temp_service_family, "Group of input temperature services", "Domen") {
+    Component(temp_service, "Temperature Controller Service", "Java", "Consume Events to handle temperature")
+}
+
+Boundary(light_service_family, "Group of input light services", "Domen") {
+    Component(light_service, "Light Controller Service", "Java", "Consume Events to handle light")
+}
+
+Boundary(heating_service_family, "Group of input heating services", "Domen") {
+    Component(heating_service, "Heating Controller Service", "Java", "Consume Events to handle boiler")
+}
+
+Rel(ext_dev, api_gateway, "Devices Requests", $tags="read_write")
+Rel(user_api, api_gateway, "User Requests", $tags="write")
+Rel(api_gateway, system_info_service, "User Requests", $tags="read_write")
+
+ComponentDb(heating_database, "Master Database", "Mongodb Cluster", "Store heating service info")
+ComponentDb(light_database, "Master Database", "Mongodb Cluster", "Store light service info")
+ComponentDb(temperature_database, "Master Database", "Mongodb Cluster", "Store temperature service info")
+ComponentDb(user_database, "Master Database", "Mongodb Cluster", "Store user info")
+
+Rel(api_gateway, c_sensor_input, "Devices Requests", $tags="write")
+Rel(c_sensor_input, kafka, "Input data", $tags="write")
+Rel(system_info_service, kafka, "User Data", $tags="write")
+
+Rel(kafka, temp_service, "Temperature data", $tags="read_write")
+Rel(kafka, light_service, "Light data", $tags="read_write")
+Rel(kafka, heating_service, "Heating data", $tags="read_write")
+
+Rel(temp_service, temperature_database, "Temperature data", $tags="read_write")
+Rel(light_service, light_database, "Light data", $tags="read_write")
+Rel(heating_service, heating_database, "Write", $tags="read_write")
+
+
+Rel(system_info_service, user_database, "Read/Write", $tags="read_write")
+
+
+
+
+@enduml

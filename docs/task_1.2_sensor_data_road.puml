@@ -1,0 +1,20 @@
+@startuml
+
+title Sensor data road
+
+Sensor -> "Api Gateway"
+"Api Gateway" -> "Input data Service"
+"Input data Service" -> Kafka
+
+Kafka -> "Temperature handler service"
+Kafka -> "Light handler service"
+Kafka -> "Heating handler service"
+
+
+"Temperature handler service" -> "Temperature DB"
+"Heating handler service" -> "Heating DB"
+"Light handler service" -> "Light DB"
+
+"Heating handler service" -> "Boiler"
+
+@enduml

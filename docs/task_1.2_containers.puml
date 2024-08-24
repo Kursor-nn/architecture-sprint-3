@@ -1,0 +1,140 @@
+@startuml
+!include ./common/C4_Context.puml
+!include ./common/C4_Container.puml
+
+title Уровень контейнеров
+
+Person_Ext(user, "User system")
+
+Container_Ext(light_device, "Light sensors", "external device")
+Container_Ext(temperature_device, "Temperature sensors", "external device")
+Container_Ext(boiler_device, "Boiler", "external device")
+Container_Ext(ssd_storage, "SSD Storage")
+
+AddRelTag("read", $lineColor="#00e600", $legendText="Write")
+AddRelTag("write", $lineColor="#ff3333", $legendText="Read")
+AddRelTag("read_write", $lineColor="black", $legendText="Read/Write")
+AddRelTag("log", $lineColor="#ffa500", $legendText="Logs")
+AddRelTag("metric", $lineColor="#30d5c8", $legendText="Metrics")
+
+System_Boundary(c1, "Smart Home") {
+    ContainerQueue_Ext(kafka, "Databus", "Kafka Cluster", "Store and transport messages to services")
+
+    Container(service_reg, "Service Registry", "Java", "Active service in system registry")
+
+    Boundary(prometheus_space, "Prometheus Space") {
+        Container(prometheus, "Prometheus", "Java")
+    }
+
+    Boundary(elk_space, "ELK Space") {
+        Container(elk, "ELK", "ELK stack to support log storing and searching")
+    }
+
+    Boundary(kong_space, "KONG Space") {
+        Container(kong, "API Gateway")
+    }
+
+    Boundary(user_space, "User data controller") {
+        Container(user_api_service, "Api User Service", "Java")
+        Container(user_keycloak, "Api User Service KeyCloak", "Java")
+
+        ContainerDb(user_api_db, "Api User Service DB", "Postgress")
+        ContainerDb(user_keycloak_db, "Keycloak DB", "Postgress")
+
+        Rel(user_api_service, elk, "User service logs", $tags="write")
+        Rel(user_api_service, user_api_db, "User data", $tags="read_write")
+        Rel(user_api_service, user_keycloak, "User data", $tags="read_write")
+        Rel(user_keycloak, user_keycloak_db, "User data", $tags="read_write")
+        Rel(user_api_service, prometheus, "Metriucs", $tags="metric")
+    }
+
+    Boundary(input_data_handling_space, "Device Input Data handler controller") {
+        Container(input_adapter_service, "Input device data handler", "Java", "Validate and transport data to storage")
+        ContainerDb(input_adapter_service_db, "Input device data handler Database", "Postgress")
+
+        Rel(input_adapter_service, kafka, "Device Message", $tags="write")
+        Rel(input_adapter_service, elk, "User service logs", $tags="write")
+        Rel(input_adapter_service, input_adapter_service_db, "Device Message Data", $tags="read_write")
+        Rel(input_adapter_service, prometheus, "Metriucs", $tags="metric")
+
+        Rel(input_adapter_service, prometheus, "Metriucs", $tags="metric")
+        Rel(input_adapter_service_db, prometheus, "Metriucs", $tags="metric")
+    }
+
+    Boundary(event_handling_space, "Event handler Space") {
+        Container(device_keycloak, "Device KeyCloak", "Java")
+        ContainerDb(device_keycloak_db, "Keycloak DB", "Postgress")
+        Rel(device_keycloak, device_keycloak_db, "Device Data", $tags="read_write")
+
+
+        Boundary(heating_space, "Heating Controller Space"){
+            Container(heating_service, "Heating Controller Service", "Java", "Consume Events to handle boiler")
+            ContainerDb(heating_service_db, "Heating Master Database", "Mongodb Cluster", "Store info")
+            Rel(heating_service, heating_service_db, "Device Message Data", $tags="read_write")
+            Rel(heating_service, elk, "Handler logs", $tags="read_write")
+            Rel(heating_service, device_keycloak, "Handler private info", $tags="read_write")
+            Rel(heating_service, elk, "Service registration and discovering", $tags="read_write")
+
+
+            Rel(kafka, heating_service, "Consume and publish messsage", $tags="read_write")
+            Rel(heating_service_db, ssd_storage, "Store data", $tags="read_write")
+
+            Rel(heating_service, prometheus, "Metriucs", $tags="metric")
+            Rel(heating_service_db, prometheus, "Metriucs", $tags="metric")
+        }
+
+        Boundary(temperature_space, "Temperature Controller Space"){
+            Container(temperature_service, "Temperature Controller Space", "Java", "Consume Events")
+            ContainerDb(temperature_service_db, "Temperature Master Database", "Mongodb Cluster", "Store info")
+            Rel(temperature_service, temperature_service_db, "Device Message Data", $tags="read_write")
+            Rel(temperature_service, elk, "Handler logs", $tags="read_write")
+            Rel(temperature_service, device_keycloak, "Handler private info", $tags="read_write")
+            Rel(temperature_service, service_reg, "Service registration and discovering", $tags="read_write")
+
+            Rel(kafka, temperature_service, "Consume and publish messsage", $tags="read_write")
+            Rel(temperature_service, ssd_storage, "Store data", $tags="read_write")
+
+            Rel(temperature_service, prometheus, "Metriucs", $tags="metric")
+            Rel(temperature_service_db, prometheus, "Metriucs", $tags="metric")
+        }
+
+        Boundary(light_space, "Light Controller Space"){
+            Container(light_service, "Light Controller Space", "Java", "Consume Events")
+            ContainerDb(light_service_db, "Light Master Database", "Mongodb Cluster", "Store info")
+            Rel(light_service, light_service_db, "Device Message Data", $tags="read_write")
+            Rel(light_service, elk, "Handler logs", $tags="read_write")
+            Rel(light_service, device_keycloak, "Handler private info", $tags="read_write")
+            Rel(light_service, service_reg, "Service registration and discovering", $tags="read_write")
+
+            Rel(kafka, light_service, "Consume and publish messsage", $tags="read_write")
+            Rel(light_service_db, ssd_storage, "Store data", $tags="read_write")
+
+            Rel(light_service, prometheus, "Metriucs", $tags="metric")
+            Rel(light_service_db, prometheus, "Metriucs", $tags="metric")
+        }
+    }
+}
+
+Rel(user, kong, "API Gateway", $tags="read_write")
+Rel(kong, user_api_service, "Requests", $tags="read_write")
+Rel(kong, input_adapter_service, "Requests", $tags="read_write")
+Rel(kong, elk, "Requests", $tags="write")
+Rel(user_api_service, service_reg, "Registration/Discover", $tags="read_write")
+Rel(input_adapter_service, service_reg, "Registration/Discover", $tags="read_write")
+Rel(elk, ssd_storage, "Store data", $tags="read_write")
+Rel(kafka, ssd_storage, "Store data", $tags="read_write")
+
+Rel(temperature_device, kong, "Temperature sensor send data to API", $tags="write")
+Rel(light_device, kong, "Light sensor send data to API", $tags="write")
+Rel(heating_service, boiler_device, "Turn On/Off", $tags="write")
+
+Rel(kafka, prometheus, "Metrics", $tags="write")
+Rel(elk, prometheus, "Metrics", $tags="write")
+Rel(ssd_storage, prometheus, "Metrics", $tags="write")
+
+Rel(kong, prometheus, "Access to metrics", $tags="read_write")
+Rel(kong, elk, "Access to logs", $tags="read_write")
+
+SHOW_LEGEND()
+
+@enduml
