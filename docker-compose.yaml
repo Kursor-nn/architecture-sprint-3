@@ -1,6 +1,8 @@
 services:
   web-proxy:
     build: ./config/nginx
+    volumes:
+      - ./config/nginx:/etc/nginx/
     ports:
       - 80:80
     restart: on-failure
@@ -9,13 +11,21 @@ services:
     build: ./telemetry/
     ports:
       - 8081:8080
+    volumes:
+      - /tmp:/tmp
     restart: on-failure
+    depends_on:
+      - prodmongodb
 
   device-reg:
     build: ./device-reg-service/
     ports:
       - 8082:8080
+    volumes:
+      - /tmp:/tmp
     restart: on-failure
+    depends_on:
+      - prodpostgres
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -24,15 +34,25 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - 22181:2181
+    volumes:
+      - ./config/zookeeper/data:/var/lib/zookeeper/data
+      - ./config/zookeeper/log:/var/lib/zookeeper/log
     healthcheck:
       test: nc -z localhost 2181 || exit -1
       interval: 10s
       timeout: 5s
       retries: 3
 
+  prodmongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: telemetry
+
   prodpostgres:
     image: postgres:13.3
-    hostname: smart-home-monolith-postgresql.default
+    hostname: prodpostgres
     environment:
       POSTGRES_DB: productdb
       POSTGRES_USER: postgres

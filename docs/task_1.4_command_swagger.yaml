@@ -6,67 +6,11 @@ info:
 tags:
   - name: device
     description: Device
+servers:
+  - url: http://localhost:80/
+    description: test server
 paths:
-  /device/type:
-    get:
-      tags:
-        - device
-      security:
-        - bearerAuth: [ ]
-      summary: get device types
-      parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/size'
-        - $ref: '#/components/parameters/user'
-      operationId: getTypes
-      responses:
-        200:
-          description: success
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResult"
-                  - type: object
-                    properties:
-                      results:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/DeviceType"
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        403:
-          $ref: '#/components/responses/ForbiddenError'
-    post:
-      tags:
-        - device
-      security:
-        - bearerAuth: [ ]
-      parameters:
-        - $ref: '#/components/parameters/user'
-      summary: create new type
-      operationId: addType
-      requestBody:
-        description: type info
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeviceType'
-      responses:
-        201:
-          description: Type is addded
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeviceType"
-        400:
-          $ref: '#/components/responses/BadRequestError'
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        403:
-          $ref: '#/components/responses/ForbiddenError'
-  /device:
+  /devices:
     get:
       tags:
         - device
@@ -75,7 +19,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/size'
-        - $ref: '#/components/parameters/user'
       summary: get devices
       operationId: getAll
       responses:
@@ -101,8 +44,6 @@ paths:
         - device
       security:
         - bearerAuth: [ ]
-      parameters:
-        - $ref: '#/components/parameters/user'
       summary: create new device
       operationId: create
       requestBody:
@@ -125,7 +66,7 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         403:
           $ref: '#/components/responses/ForbiddenError'
-  /device/{id}:
+  /devices/{id}:
     get:
       tags:
         - device
@@ -135,7 +76,6 @@ paths:
       operationId: get
       parameters:
         - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/user'
       responses:
         200:
           description: device info
@@ -158,7 +98,6 @@ paths:
       operationId: update
       parameters:
         - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/user'
       requestBody:
         description: new device parameters
         required: true
@@ -188,7 +127,6 @@ paths:
       operationId: delete
       parameters:
         - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/user'
       responses:
         200:
           description: Delete device
@@ -202,7 +140,7 @@ paths:
           $ref: '#/components/responses/NotFoundError'
         403:
           $ref: '#/components/responses/ForbiddenError'
-  /device/{id}/action:
+  /devices/{id}/action:
     post:
       tags:
         - device
@@ -212,7 +150,6 @@ paths:
       operationId: doAction
       parameters:
         - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/user'
       requestBody:
         description: Action parameters
         required: true
@@ -229,85 +166,7 @@ paths:
           $ref: '#/components/responses/NotFoundError'
         403:
           $ref: '#/components/responses/ForbiddenError'
-  /device/{id}/type:
-    get:
-      tags:
-        - device
-      security:
-        - bearerAuth: [ ]
-      summary: get device type
-      operationId: getType
-      parameters:
-        - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/user'
-      responses:
-        200:
-          description: Device data
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeviceType"
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          $ref: '#/components/responses/NotFoundError'
-        403:
-          $ref: '#/components/responses/ForbiddenError'
-    put:
-      tags:
-        - device
-      security:
-        - bearerAuth: [ ]
-      summary: Update device
-      operationId: updateType
-      parameters:
-        - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/user'
-      requestBody:
-        description: device data
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeviceType'
-      responses:
-        200:
-          description: device is updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeviceType"
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          $ref: '#/components/responses/NotFoundError'
-        403:
-          $ref: '#/components/responses/ForbiddenError'
-  /device/{id}/status:
-    get:
-      tags:
-        - device
-      security:
-        - bearerAuth: [ ]
-      summary: get device status
-      operationId: getStatus
-      parameters:
-        - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/user'
-      responses:
-        200:
-          description: Device Status
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DeviceType"
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          $ref: '#/components/responses/NotFoundError'
-        403:
-          $ref: '#/components/responses/ForbiddenError'
-  /devices/{device_id}/telemetry/latest:
+  /devices/{id}/telemetry/latest:
     get:
       tags:
         - device
@@ -315,25 +174,20 @@ paths:
         - bearerAuth: [ ]
       summary: get devices
       operationId: getLatest
+      parameters:
+        - $ref: '#/components/parameters/id'
       responses:
         200:
           description: success
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResult"
-                  - type: object
-                    properties:
-                      results:
-                        type: "#/components/schemas/TelemetryData"
-                        items:
-                          $ref: "#/components/schemas/TelemetryData"
+                $ref: "#/components/schemas/TelemetryData"
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
           $ref: '#/components/responses/ForbiddenError'
-  /devices/{device_id}/telemetry:
+  /devices/{id}/telemetry:
     get:
       tags:
         - device
@@ -341,6 +195,8 @@ paths:
         - bearerAuth: [ ]
       summary: get devices
       operationId: getLatest
+      parameters:
+        - $ref: '#/components/parameters/id'
       responses:
         200:
           description: success
@@ -375,13 +231,6 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
-    user:
-      in: header
-      name: login
-      schema:
-        type: string
-        example: user
-      required: true
     page:
       in: query
       name: page
