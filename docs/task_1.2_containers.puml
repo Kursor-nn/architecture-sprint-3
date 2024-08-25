@@ -30,17 +30,19 @@ System_Boundary(c1, "Smart Home") {
         Container(elk, "ELK", "ELK stack to support log storing and searching")
     }
 
-    Boundary(kong_space, "KONG Space") {
-        Container(kong, "API Gateway")
+    Boundary(Nginx_space, "Nginx Space") {
+        Container(Nginx, "API Gateway", "Nginx")
+    }
+
+    Boundary(Nginx_space, "Nginx Space") {
+        ContainerDb(common_db, "Common Database", "Postgress")
     }
 
     Boundary(telemetry_space, "Telemetry data controller") {
         Container(telemetry_api_service, "Api Telemetry Service", "Java")
-        ContainerDb(telemetry_api_service_db, "Api Telemetry Service DB", "Postgress")
-
 
         Rel(telemetry_api_service, elk, "User service logs", $tags="write")
-        Rel(telemetry_api_service, telemetry_api_service_db, "User data", $tags="read_write")
+        Rel(telemetry_api_service, common_db, "User data", $tags="read_write")
         Rel(telemetry_api_service, prometheus, "Metriucs", $tags="metric")
         Rel(telemetry_api_service, service_reg, "Metriucs", $tags="metric")
     }
@@ -48,19 +50,15 @@ System_Boundary(c1, "Smart Home") {
     Boundary(user_space, "User data controller") {
         Container(user_api_service, "Api User Service", "Java")
 
-        ContainerDb(user_api_db, "Api User Service DB", "Postgress")
-
         Rel(user_api_service, elk, "User service logs", $tags="write")
-        Rel(user_api_service, user_api_db, "User data", $tags="read_write")
+        Rel(user_api_service, common_db, "User data", $tags="read_write")
         Rel(user_api_service, prometheus, "Metriucs", $tags="metric")
     }
 
     Boundary(device_registration_space, "Device Registration controller") {
         Container(device_registration_service, "Api Device Registration Service", "Java")
 
-        ContainerDb(device_registration_service_db, "Api Device Registration Database", "Postgress")
-
-        Rel(device_registration_service, device_registration_service_db, "User data", $tags="read_write")
+        Rel(device_registration_service, common_db, "Devices data", $tags="read_write")
         Rel(device_registration_service, elk, "User service logs", $tags="write")
         Rel(device_registration_service, prometheus, "Metriucs", $tags="metric")
         Rel(device_registration_service, service_reg, "Metriucs", $tags="metric")
@@ -68,38 +66,30 @@ System_Boundary(c1, "Smart Home") {
 
     Boundary(input_data_handling_space, "Device Input Data handler controller") {
         Container(input_adapter_service, "Input device data handler", "Java", "Validate and transport data to storage")
-        ContainerDb(input_adapter_service_db, "Input device data handler Database", "Postgress")
 
         Rel(input_adapter_service, kafka, "Device Message", $tags="write")
         Rel(input_adapter_service, elk, "User service logs", $tags="write")
-        Rel(input_adapter_service, input_adapter_service_db, "Device Message Data", $tags="read_write")
+        Rel(input_adapter_service, common_db, "Input device Message Data", $tags="read_write")
         Rel(input_adapter_service, prometheus, "Metriucs", $tags="metric")
 
         Rel(input_adapter_service, prometheus, "Metriucs", $tags="metric")
-        Rel(input_adapter_service_db, prometheus, "Metriucs", $tags="metric")
     }
 
     Boundary(event_handling_space, "Event handler Space") {
 
         Boundary(heating_space, "Heating Controller Space"){
             Container(heating_service, "Heating Controller Service", "Java", "Consume Events to handle boiler")
-            ContainerDb(heating_service_db, "Heating Master Database", "Mongodb Cluster", "Store info")
-            Rel(heating_service, heating_service_db, "Device Message Data", $tags="read_write")
+
+            Rel(heating_service, common_db, "Device Message Data", $tags="read_write")
             Rel(heating_service, elk, "Handler logs", $tags="read_write")
             Rel(heating_service, elk, "Service registration and discovering", $tags="read_write")
-
-
             Rel(kafka, heating_service, "Consume and publish messsage", $tags="read_write")
-            Rel(heating_service_db, ssd_storage, "Store data", $tags="read_write")
-
             Rel(heating_service, prometheus, "Metriucs", $tags="metric")
-            Rel(heating_service_db, prometheus, "Metriucs", $tags="metric")
         }
 
         Boundary(temperature_space, "Temperature Controller Space"){
             Container(temperature_service, "Temperature Controller Space", "Java", "Consume Events")
-            ContainerDb(temperature_service_db, "Temperature Master Database", "Mongodb Cluster", "Store info")
-            Rel(temperature_service, temperature_service_db, "Device Message Data", $tags="read_write")
+            Rel(temperature_service, common_db, "Device Message Data", $tags="read_write")
             Rel(temperature_service, elk, "Handler logs", $tags="read_write")
             Rel(temperature_service, service_reg, "Service registration and discovering", $tags="read_write")
 
@@ -107,44 +97,48 @@ System_Boundary(c1, "Smart Home") {
             Rel(temperature_service, ssd_storage, "Store data", $tags="read_write")
 
             Rel(temperature_service, prometheus, "Metriucs", $tags="metric")
-            Rel(temperature_service_db, prometheus, "Metriucs", $tags="metric")
         }
 
         Boundary(light_space, "Light Controller Space"){
             Container(light_service, "Light Controller Space", "Java", "Consume Events")
-            ContainerDb(light_service_db, "Light Master Database", "Mongodb Cluster", "Store info")
-            Rel(light_service, light_service_db, "Device Message Data", $tags="read_write")
+            Rel(light_service, common_db, "Device Message Data", $tags="read_write")
             Rel(light_service, elk, "Handler logs", $tags="read_write")
             Rel(light_service, service_reg, "Service registration and discovering", $tags="read_write")
 
             Rel(kafka, light_service, "Consume and publish messsage", $tags="read_write")
-            Rel(light_service_db, ssd_storage, "Store data", $tags="read_write")
-
             Rel(light_service, prometheus, "Metriucs", $tags="metric")
-            Rel(light_service_db, prometheus, "Metriucs", $tags="metric")
+        }
+
+        Boundary(smart_home_monolit_space, "Smart Home Monolite Space"){
+            Container(monolite_service, "Monolit", "Java")
+
+            Rel(monolite_service, common_db, "Device Message Data", $tags="read_write")
+            Rel(monolite_service, service_reg, "Service registration and discovering", $tags="read_write")
+
+            Rel(monolite_service, kafka, "Consume and publish messsage", $tags="read_write")
         }
     }
 }
 
-Rel(user, kong, "API Gateway", $tags="read_write")
-Rel(kong, user_api_service, "Requests", $tags="read_write")
-Rel(kong, input_adapter_service, "Requests", $tags="read_write")
-Rel(kong, elk, "Requests", $tags="write")
+Rel(user, Nginx, "API Gateway", $tags="read_write")
+Rel(Nginx, user_api_service, "Requests", $tags="read_write")
+Rel(Nginx, input_adapter_service, "Requests", $tags="read_write")
+Rel(Nginx, elk, "Requests", $tags="write")
 Rel(user_api_service, service_reg, "Registration/Discover", $tags="read_write")
 Rel(input_adapter_service, service_reg, "Registration/Discover", $tags="read_write")
 Rel(elk, ssd_storage, "Store data", $tags="read_write")
 Rel(kafka, ssd_storage, "Store data", $tags="read_write")
 
-Rel(temperature_device, kong, "Temperature sensor send data to API", $tags="write")
-Rel(light_device, kong, "Light sensor send data to API", $tags="write")
+Rel(temperature_device, Nginx, "Temperature sensor send data to API", $tags="write")
+Rel(light_device, Nginx, "Light sensor send data to API", $tags="write")
 Rel(heating_service, boiler_device, "Turn On/Off", $tags="write")
 
 Rel(kafka, prometheus, "Metrics", $tags="write")
 Rel(elk, prometheus, "Metrics", $tags="write")
 Rel(ssd_storage, prometheus, "Metrics", $tags="write")
 
-Rel(kong, prometheus, "Access to metrics", $tags="read_write")
-Rel(kong, elk, "Access to logs", $tags="read_write")
+Rel(Nginx, prometheus, "Access to metrics", $tags="read_write")
+Rel(Nginx, elk, "Access to logs", $tags="read_write")
 
 SHOW_LEGEND()
 

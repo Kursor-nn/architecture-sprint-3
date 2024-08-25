@@ -19,7 +19,7 @@ Boundary(input_adapter_family, "Group of input adapters", "Domen") {
 
 ContainerQueue_Ext(kafka, "Databus", "Kafka Cluster", "Store and transport messages to services")
 
-Component(api_gateway, "API Gateway", "Nginx/Kong", "API Gateway")
+Component(api_gateway, "API Gateway", "Nginx/Nginx", "API Gateway")
 
 Boundary(system_info_service_family, "Group of system info services", "Domen") {
     Component(system_info_service, "System Info Handler", "Java", "Validate, Handle and provide system data for user via user api")
