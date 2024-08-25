@@ -45,7 +45,6 @@ System_Boundary(c1, "Smart Home") {
         Rel(telemetry_api_service, service_reg, "Metriucs", $tags="metric")
     }
 
-
     Boundary(user_space, "User data controller") {
         Container(user_api_service, "Api User Service", "Java")
 
@@ -54,6 +53,17 @@ System_Boundary(c1, "Smart Home") {
         Rel(user_api_service, elk, "User service logs", $tags="write")
         Rel(user_api_service, user_api_db, "User data", $tags="read_write")
         Rel(user_api_service, prometheus, "Metriucs", $tags="metric")
+    }
+
+    Boundary(device_registration_space, "Device Registration controller") {
+        Container(device_registration_service, "Api Device Registration Service", "Java")
+
+        ContainerDb(device_registration_service_db, "Api Device Registration Database", "Postgress")
+
+        Rel(device_registration_service, device_registration_service_db, "User data", $tags="read_write")
+        Rel(device_registration_service, elk, "User service logs", $tags="write")
+        Rel(device_registration_service, prometheus, "Metriucs", $tags="metric")
+        Rel(device_registration_service, service_reg, "Metriucs", $tags="metric")
     }
 
     Boundary(input_data_handling_space, "Device Input Data handler controller") {
