@@ -59,7 +59,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.36.2
     volumes:
-      - ./prometheus/:/etc/prometheus/
+      - ./config/prometheus/:/etc/prometheus/
       - ssd_storage:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -70,7 +70,6 @@ services:
       - 9090:9090
     links:
       - cadvisor:cadvisor
-      - alertmanager:alertmanager
     depends_on:
       - cadvisor
     restart: always
@@ -99,7 +98,7 @@ services:
     ports:
       - 9093:9093
     volumes:
-      - ./alertmanager/:/etc/alertmanager/
+      - ./config/alertmanager/:/etc/alertmanager/
     restart: always
     command:
       - '--config.file=/etc/alertmanager/config.yml'
