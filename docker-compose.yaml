@@ -1,4 +1,22 @@
 services:
+  web-proxy:
+    build: ./config/nginx
+    ports:
+      - 80:80
+    restart: on-failure
+
+  telemetry:
+    build: ./telemetry/
+    ports:
+      - 8081:8080
+    restart: on-failure
+
+  device-reg:
+    build: ./device-reg-service/
+    ports:
+      - 8082:8080
+    restart: on-failure
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -12,13 +30,18 @@ services:
       timeout: 5s
       retries: 3
 
-  web-proxy:
-    build: ./config/nginx
+  prodpostgres:
+    image: postgres:13.3
+    hostname: smart-home-monolith-postgresql.default
+    environment:
+      POSTGRES_DB: productdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ./postgresdata:/var/lib/postgresql/data
     ports:
-      - 80:80
-      - 443:443
-    depends_on:
-      - app
+      - 5432:5432
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -103,6 +126,7 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
+
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
     volumes:
@@ -129,6 +153,16 @@ services:
     env_file:
       - ./config/grafana/config.monitoring
     restart: always
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    hostname: swagger-ui
+    ports:
+      - "8085:8080"
+    volumes:
+      - ./docs:/spec
+    environment:
+      - SWAGGER_JSON=/spec/task_1.4_command_swagger.yaml
 
 volumes:
   ssd_storage:
