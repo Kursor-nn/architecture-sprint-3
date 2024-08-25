@@ -45,10 +45,19 @@ entity DeviceData {
     * default - default value
 }
 
+entity TelemetryData {
+    * id - unique id
+    * device_id - device id
+    * value_name - parameter
+    * value - paramter value
+    * datetime - moment at time
+}
+
 Home }o--|| User
 Device }o--|| Home
 Device ||--|| "DeviceType"
 "DeviceData" }o--|| Device
 "Device" }o--|| DeviceAction
+"Device" }o--|| TelemetryData
 
 @enduml

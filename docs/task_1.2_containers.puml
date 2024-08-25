@@ -34,17 +34,25 @@ System_Boundary(c1, "Smart Home") {
         Container(kong, "API Gateway")
     }
 
+    Boundary(telemetry_space, "Telemetry data controller") {
+        Container(telemetry_api_service, "Api Telemetry Service", "Java")
+        ContainerDb(telemetry_api_service_db, "Api Telemetry Service DB", "Postgress")
+
+
+        Rel(telemetry_api_service, elk, "User service logs", $tags="write")
+        Rel(telemetry_api_service, telemetry_api_service_db, "User data", $tags="read_write")
+        Rel(telemetry_api_service, prometheus, "Metriucs", $tags="metric")
+        Rel(telemetry_api_service, service_reg, "Metriucs", $tags="metric")
+    }
+
+
     Boundary(user_space, "User data controller") {
         Container(user_api_service, "Api User Service", "Java")
-        Container(user_keycloak, "Api User Service KeyCloak", "Java")
 
         ContainerDb(user_api_db, "Api User Service DB", "Postgress")
-        ContainerDb(user_keycloak_db, "Keycloak DB", "Postgress")
 
         Rel(user_api_service, elk, "User service logs", $tags="write")
         Rel(user_api_service, user_api_db, "User data", $tags="read_write")
-        Rel(user_api_service, user_keycloak, "User data", $tags="read_write")
-        Rel(user_keycloak, user_keycloak_db, "User data", $tags="read_write")
         Rel(user_api_service, prometheus, "Metriucs", $tags="metric")
     }
 
@@ -62,17 +70,12 @@ System_Boundary(c1, "Smart Home") {
     }
 
     Boundary(event_handling_space, "Event handler Space") {
-        Container(device_keycloak, "Device KeyCloak", "Java")
-        ContainerDb(device_keycloak_db, "Keycloak DB", "Postgress")
-        Rel(device_keycloak, device_keycloak_db, "Device Data", $tags="read_write")
-
 
         Boundary(heating_space, "Heating Controller Space"){
             Container(heating_service, "Heating Controller Service", "Java", "Consume Events to handle boiler")
             ContainerDb(heating_service_db, "Heating Master Database", "Mongodb Cluster", "Store info")
             Rel(heating_service, heating_service_db, "Device Message Data", $tags="read_write")
             Rel(heating_service, elk, "Handler logs", $tags="read_write")
-            Rel(heating_service, device_keycloak, "Handler private info", $tags="read_write")
             Rel(heating_service, elk, "Service registration and discovering", $tags="read_write")
 
 
@@ -88,7 +91,6 @@ System_Boundary(c1, "Smart Home") {
             ContainerDb(temperature_service_db, "Temperature Master Database", "Mongodb Cluster", "Store info")
             Rel(temperature_service, temperature_service_db, "Device Message Data", $tags="read_write")
             Rel(temperature_service, elk, "Handler logs", $tags="read_write")
-            Rel(temperature_service, device_keycloak, "Handler private info", $tags="read_write")
             Rel(temperature_service, service_reg, "Service registration and discovering", $tags="read_write")
 
             Rel(kafka, temperature_service, "Consume and publish messsage", $tags="read_write")
@@ -103,7 +105,6 @@ System_Boundary(c1, "Smart Home") {
             ContainerDb(light_service_db, "Light Master Database", "Mongodb Cluster", "Store info")
             Rel(light_service, light_service_db, "Device Message Data", $tags="read_write")
             Rel(light_service, elk, "Handler logs", $tags="read_write")
-            Rel(light_service, device_keycloak, "Handler private info", $tags="read_write")
             Rel(light_service, service_reg, "Service registration and discovering", $tags="read_write")
 
             Rel(kafka, light_service, "Consume and publish messsage", $tags="read_write")

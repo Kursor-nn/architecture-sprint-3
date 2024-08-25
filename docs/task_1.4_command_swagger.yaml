@@ -307,6 +307,58 @@ paths:
           $ref: '#/components/responses/NotFoundError'
         403:
           $ref: '#/components/responses/ForbiddenError'
+  /devices/{device_id}/telemetry/latest:
+    get:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      summary: get devices
+      operationId: getLatest
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResult"
+                  - type: object
+                    properties:
+                      results:
+                        type: "#/components/schemas/TelemetryData"
+                        items:
+                          $ref: "#/components/schemas/TelemetryData"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+  /devices/{device_id}/telemetry:
+    get:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      summary: get devices
+      operationId: getLatest
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResult"
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TelemetryData"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
 components:
   responses:
     UnauthorizedError:
@@ -377,6 +429,24 @@ components:
           type: string
           example: "in-work"
         last_update:
+          type: datetime
+          example: "2024-08-24T12:00:00"
+    TelemetryData:
+      type: object
+      properties:
+        id:
+          type: number
+          example: "123"
+        device_id:
+          type: number
+          example: "456"
+        value_name:
+          type: number
+          example: "some_parameters"
+        value:
+          type: number
+          example: "1"
+        datetime:
           type: datetime
           example: "2024-08-24T12:00:00"
     Device:
