@@ -2,7 +2,6 @@ package ru.yandex.practicum.smarthome.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,9 +18,8 @@ import ru.yandex.practicum.smarthome.service.DeviceService;
 public class DeviceController {
 
     private final DeviceService deviceService;
-    private final LoggingRebinder loggingRebinder;
 
-    @GetMapping("/devices")
+    @GetMapping(value = "/devices", produces = "application/json")
     public Page<DeviceDto> getAll(Pageable pageable) {
         log.info("Get all devices {}", pageable);
         return deviceService.getAll(pageable);
@@ -39,6 +37,14 @@ public class DeviceController {
         log.info("Get device {}", deviceId);
         DeviceDto device = deviceService.getInfo(deviceId);
         return ResponseEntity.ok(device);
+    }
+
+
+    @DeleteMapping("/devices/{device_id}")
+    public ResponseEntity<Void> delete(@PathVariable("device_id") Long deviceId) {
+        log.info("Delete device {}", deviceId);
+        deviceService.delete(deviceId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/devices/{device_id}/action")

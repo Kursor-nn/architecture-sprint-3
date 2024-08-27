@@ -90,35 +90,6 @@ paths:
           $ref: '#/components/responses/NotFoundError'
         403:
           $ref: '#/components/responses/ForbiddenError'
-    put:
-      tags:
-        - device
-      security:
-        - bearerAuth: [ ]
-      summary: update device by id
-      operationId: update
-      parameters:
-        - $ref: '#/components/parameters/id'
-      requestBody:
-        description: new device parameters
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Device'
-      responses:
-        200:
-          description: Устройство обновлено
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Device"
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
-        404:
-          $ref: '#/components/responses/NotFoundError'
-        403:
-          $ref: '#/components/responses/ForbiddenError'
     delete:
       tags:
         - device
@@ -237,7 +208,7 @@ components:
       name: page
       schema:
         type: integer
-        example: 1
+        example: 0
     pageSize:
       in: query
       name: size
@@ -313,17 +284,26 @@ components:
           type: integer
           format: int64
           example: 10
-        type_id:
-          type: integer
-          format: int64
-          example: 10
-        serial:
+        name:
           type: string
           example: "123456"
-        home_id:
-          type: integer
-          format: int64
-          example: 10
+          default: "123456"
+        type:
+          type: string
+          example: "temperature"
+          default: "temperature"
+        serialNumber:
+          type: string
+          example: "123345"
+          default: "123345"
+        modelName:
+          type: string
+          example: "amazing-model"
+          default: "amazing-model"
+        manufacturer:
+          type: string
+          example: "amazing-manufacturer"
+          default: "amazing-manufacturer"
     PaginatedResult:
       type: object
       properties:

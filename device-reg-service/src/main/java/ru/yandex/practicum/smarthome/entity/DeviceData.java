@@ -13,7 +13,6 @@ public class DeviceData {
     @Id
     @GeneratedValue
     private Long id;
-    private Long userId;
     private String name;
     private String type;
     private String serialNumber;

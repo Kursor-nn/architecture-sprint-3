@@ -6,7 +6,6 @@ import ru.yandex.practicum.smarthome.entity.DeviceData;
 @Data
 public class DeviceDto {
     private Long id;
-    private Long userId;
     private String name;
     private String type;
     private String serialNumber;

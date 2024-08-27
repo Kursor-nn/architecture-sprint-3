@@ -5,6 +5,17 @@ spring:
     mongodb:
       uri: mongodb://prodmongodb:27017/telemetry
 
+  kafka:
+    bootstrap-servers: kafka:29092
+    consumer:
+      group-id: default-kafka-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      acks: all
+      retries: 3
+
 logging:
   level:
     root: INFO

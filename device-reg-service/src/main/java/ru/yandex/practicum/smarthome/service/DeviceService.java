@@ -26,6 +26,10 @@ public class DeviceService {
                 .orElseThrow(DataIsNotFound::new);
     }
 
+    public void delete(Long deviceId) {
+        deviceRepository.deleteById(deviceId);
+    }
+
     public Page<DeviceDto> getAll(Pageable pageable) {
         var page = deviceRepository.findAll(pageable);
         return page.map(dataMapper::data2dto);
