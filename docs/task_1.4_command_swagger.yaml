@@ -17,8 +17,9 @@ paths:
       security:
         - bearerAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/offset'
       summary: get devices
       operationId: getAll
       responses:
@@ -231,19 +232,26 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
-    page:
+    pageNumber:
       in: query
       name: page
       schema:
         type: integer
         example: 1
-    size:
+    pageSize:
       in: query
       name: size
       schema:
         type: integer
         example: 10
         default: 10
+    offset:
+      in: query
+      name: size
+      schema:
+        type: integer
+        example: 10
+        default: 0
     id:
       in: path
       name: id

@@ -12,5 +12,4 @@ public class DeviceDto {
     private String serialNumber;
     private String modelName;
     private String manufacturer;
-    private DeviceConfDto configuration;
 }

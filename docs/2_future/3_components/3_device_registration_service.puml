@@ -1,0 +1,31 @@
+@startuml
+!include ../../common/C4_Context.puml
+!include ../../common/C4_Container.puml
+
+Container(api_gateway, "API Gateway", "API Rest")
+Container(elk, "ELK Stack", "Store logs")
+Container(prometheus, "Prometheus", "Store metrics")
+ContainerDb(mongodb, "PostgreSql", "Store device data")
+
+Container_Boundary(telemetry_container, "Registration Device Service") {
+    Container(controller, "API Rest Controller", "Java", "Provide registration and info API")
+    Container(service, "Service layer", "Java", "High level logic")
+    Container(component, "Component layer", "Java", "Tech logic")
+    Container(repository, "Repository layer", "Java", "Database Layer")
+}
+
+Rel(api_gateway, controller, "R/W")
+Rel_R(controller, service, "R/W")
+Rel_R(service, component, "R/W")
+Rel_R(component, repository, "R/W")
+Rel_R(repository, mongodb, "R/W")
+
+Rel(controller, elk, "R/W")
+Rel(service, elk, "R/W")
+Rel(component, elk, "R/W")
+Rel(repository, elk, "R/W")
+
+Rel(controller, prometheus, "Write")
+
+SHOW_LEGEND()
+@enduml

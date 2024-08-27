@@ -1,0 +1,22 @@
+@startuml
+!include ../../common/C4_Context.puml
+!include ../../common/C4_Container.puml
+
+Container_Boundary(api_gateway_container, "API Gateway") {
+    Container(api_gateway, "API Gateway", "Nginx", "API gateway for all clients")
+}
+
+Container_Ext(elk_stack, "ELK Stack", "Spring Boot", "Store logs")
+Container_Ext(input_data_handler_service, "Input Data Handler Service", "Java, Spring", "handle input requests from sensors")
+Container_Ext(telemetry, "Telemetry", "Java, Spring")
+Container_Ext(registration_service, "Registration Device Service", "Java, Spring")
+
+Rel(api_gateway, elk_stack, "Write")
+Rel(api_gateway, input_data_handler_service, "Write")
+Rel(api_gateway, telemetry, "Write")
+Rel(api_gateway, registration_service, "Write")
+
+
+
+SHOW_LEGEND()
+@enduml

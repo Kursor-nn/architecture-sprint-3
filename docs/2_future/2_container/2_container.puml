@@ -1,0 +1,75 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "User", "user")
+System_Ext(sensor, "sensor", "sensors")
+System_Ext(devices, "devices", "devices")
+
+Container_Boundary(core_system, "Core System"){
+    ContainerDb(common_db, "CommonDB", "PostgreSql", "Store all data")
+
+    Container_Boundary(api_gateway_container, "API Gateway") {
+        Container(api_gateway, "API Gateway", "Nginx", "API gateway for all clients")
+    }
+
+    Container_Boundary(input_data_handler_container, "Input data handler Service") {
+        Container(input_data_handler_service, "Input Sensor Event Handler", "Java, Spring", "Service receives, validate and push events to message-bus")
+    }
+
+    Container_Boundary(telemetry_container, "Telemetry") {
+        Container(telemetry_service, "Telemetry", "Java, Spring", "Collect, store and provide telemetry")
+        ContainerDb(mongo_db, "MongoDB", "MongoDb", "Store all telemetry data")
+        Rel(telemetry_service, mongo_db, "Read, Write")
+    }
+
+    Container_Boundary(event_handler_container, "Event handlers") {
+        Container(event_handler_service, "Device Service", "Java, Spring", "Handles events from sensors and manipulates devices")
+    }
+
+    Container_Boundary(heating_handler_container, "Boiler handler") {
+        Container(heating_handler_services, "Boiler Device Service", "Java, Spring", "Handle boiler state")
+    }
+
+    Container_Boundary(device_registeation_container, "Register Devices") {
+        Container(device_registeation_service, "Registration Device Service", "Java, Spring")
+    }
+
+    Container_Boundary(message_bus_container, "Message Bus") {
+        SystemQueue(message_bus, "Message Bus", "Apache Kafka")
+    }
+
+    Container_Boundary(elk_container, "Store logs") {
+        Container(elk_service, "ELK Service", "Store all log")
+    }
+
+    Container_Boundary(prometheus_container, "Metrics") {
+        Container(prometheus_service, "Prometheus Metrics", "Store all metrics")
+    }
+}
+
+Rel(user, api_gateway, "Send data")
+Rel("sensor", api_gateway, "Send data")
+
+Rel(api_gateway, input_data_handler_service, "Send data")
+Rel(event_handler_service, common_db, "Read, Write")
+Rel(device_registeation_service, common_db, "Read, Write")
+Rel(heating_handler_services, common_db, "Read, Write")
+
+Rel(input_data_handler_service, message_bus, "Read, Write")
+Rel(message_bus, event_handler_service, "Read, Write")
+Rel_R(event_handler_service, devices, "Write configuration")
+Rel_L(message_bus, telemetry_service, "Read, Write")
+Rel_R(api_gateway, telemetry_service, "Read, Write")
+
+Rel(api_gateway, device_registeation_service, "Send")
+
+Rel_L(api_gateway, elk_service, "Read, Write")
+Rel_L(telemetry_service, elk_service, "Read, Write")
+Rel_L(event_handler_service, elk_service, "Read, Write")
+
+Rel_R(api_gateway, prometheus_service, "Read, Write")
+Rel_R(telemetry_service, prometheus_service, "Read, Write")
+Rel_R(event_handler_service, prometheus_service, "Read, Write")
+
+SHOW_LEGEND()
+@enduml

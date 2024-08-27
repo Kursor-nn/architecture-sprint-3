@@ -1,0 +1,25 @@
+@startuml
+!include ../common/C4_Context.puml
+!include ../common/C4_Container.puml
+!include ../common/tags.puml
+
+title System Container Diagram
+
+
+Person(user, "User", "User")
+System_Boundary(c1, "core-system") {
+        Container(server, "Web server", "java spring-boot", "Configuraiton and monitoring server")
+        ContainerDb(database, "Database", "Postgresql", "Database")
+}
+
+System_Ext(sensor, "sensor", "External Sensors")
+System_Ext(devices, "devices", "External Devices")
+
+
+Rel(user, server, "Uses", "HTTPS")
+Rel_L(server, database, "Uses", "TCP/IP", $tags="database")
+Rel_L(sensor, server, "Uses", "HTTPS", $tags="external")
+Rel(server, devices, "Uses", "HTTPS", $tags="external")
+
+SHOW_LEGEND()
+@enduml

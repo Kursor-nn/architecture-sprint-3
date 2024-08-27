@@ -1,0 +1,62 @@
+@startuml
+!include ../../common/C4_Component.puml
+
+package "Device Registration Service" {
+    class ActionDto {
+        -Long id;
+        -String action;
+    }
+
+    class DeviceDto {
+        -Long id;
+        -Long userId;
+        -String name;
+        -String type;
+        -String serialNumber;
+        -String modelName;
+        -String manufacturer;
+    }
+
+    class DeviceController {
+        -deviceService;
+
+        +Page<DeviceDto> getAll(Pageable)
+        +void create(DeviceDto)
+        +ResponseEntity<DeviceDto> getInfo(Long)
+        +doAction(Long, ActionDto)
+    }
+
+    class DeviceService {
+        -deviceRepository;
+        -dataMapper;
+        -kafkaAdapter;
+
+        +DeviceDto getInfo(Long);
+        +List<DeviceDto> getAll();
+        +action(Long, ActionDto);
+    }
+
+    class DeviceRepository {
+        +void save(DeviceEntity)
+        +DeviceDto getInfo(Long)
+        +List<DeviceDto> getAll();
+    }
+
+    class DataMapper {
+        +DeviceDto data2dto(DeviceData)
+        +DeviceData dto2data(DeviceDto)
+    }
+
+    class KafkaAdapter {
+        +void do(ActionDto)
+    }
+
+    DeviceRepository --o DeviceService: "communicate with database"
+    DataMapper --o DeviceService: "Transform DTO->Entity and Entity->Dto"
+    ActionDto --o DeviceService: "Use"
+    DeviceDto --o DeviceService: "Use"
+
+    DeviceService --> KafkaAdapter: "Send action to message bus"
+    DeviceController -> DeviceService: "Manipulate devices"
+}
+@enduml

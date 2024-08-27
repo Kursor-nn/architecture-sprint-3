@@ -1,28 +1,67 @@
 # Базовая настройка
 Для запуска стенда:
 1. проверить что запущен Docker
-2. docker-compose up -d
-3. Swagger будет доступен по адресу http://localhost:8085
+2\. docker-compose up -d
+3. Swagger будет доступен по адресу http://localhost:8080/swagger-ui
 
-## Домены
-### Home Controller
-#### Задание 1.1:
 
-* Heating Controller - предоставляет API системы
-* Heating Service - управляет температурой и отоплением
 
-[Общая схема текущего решения](docs%2Fmonolit%2Ftask_1.1.puml)
+## Текущая реализация
 
-#### Задание 1.2:
-Схемы:
-[Схема компонент](docs%2Ftask_1.2_components.puml)
-[Схема контейнеров](docs%2Ftask_1.2_containers.puml)
-[Поток данных](docs%2Ftask_1.2_sensor_data_road.puml)
+### Текущая функциональность приложения:
 
-#### Задание 1.3:
-Схемы:
-[Описание сущностей системы](docs%2Ftask_1.3_er.puml)
+- Получение конфигурации/обновление конфигурации отопления
+- Включение/отключение отопления
+- Получение текущей температуры
 
-#### Задание 1.4:
-System API:
-[task_1.4_command_swagger.yaml](docs%2Ftask_1.4_command_swagger.yaml)
+### Домены монолитного приложения:
+
+- Конфигурация отопления
+- Сбор метрик температуры
+
+### Должны быть учтены домены:
+- Регистрация устройств
+- Телеметрия
+- Данные пользователя
+- управление внешними устройствами
+
+------------
+
+## ToBe
+
+# Описание системы
+## Компоненты системы
+### API Gateway
+
+API Gateway - реализует концепцию единой точки входа в систему
+
+### Input Device API
+Принимает данные от устройств, валидирует и отправляет в обработчики через кафку.
+
+### Telemetry Service
+
+Собирает и предоставляет данные делеметрии по запросу
+
+### Device Registration Service
+
+Сервис регистрации новых устройств в системе 
+
+### Kafka
+
+Message bus - для хранения и транспортировки событий потребителям
+
+### Описание текущего дизайна
+- [Контекст](docs%2F1_actual%2F1_context.puml)
+- [Контейнеры](docs%2F1_actual%2F2_container.puml)
+
+### Описание целевого дизайна
+* [Контекст](docs%2F2_future%2F1_context%2F1_context.puml)
+* [Контейнер](docs%2F2_future%2F2_container%2F2_container.puml)
+* Компоненты:
+  1. [API Gateway](docs%2F2_future%2F3_components%2F1_api_gateway.puml)
+  2. [Telemetry](docs%2F2_future%2F3_components%2F2_telemetry.puml)
+  3. [Device Registration Service](docs%2F2_future%2F3_components%2F3_device_registration_service.puml)
+  4. [Sensor Handler](docs%2F2_future%2F3_components%2F4_sensor_event_handler_service.puml)
+  5. [Boiler Handler](docs%2F2_future%2F3_components%2F5_boiler_event_handler_service.puml)
+* [Device Registration Service Code.puml](docs%2F2_future%2F4_code%2F1_device_registration_service.puml)
+* [ER Диаграмма](docs%2F2_future%2Ftask_1.3_er.puml)

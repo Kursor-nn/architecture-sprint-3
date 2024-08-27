@@ -1,0 +1,35 @@
+@startuml
+!include ../../common/C4_Context.puml
+!include ../../common/C4_Container.puml
+
+Container(kafka, "Kafka", "telemetry_topic", "telemetry data")
+Container(api_gateway, "API Gateway", "API Rest", "Provide telemetry into")
+Container(elk, "ELK Stack", "Store logs")
+Container(prometheus, "Prometheus", "Store metrics")
+ContainerDb(mongodb, "MongoDB", "Store telemetry")
+
+Container_Boundary(telemetry_container, "Telemetry") {
+    Container(controller, "API Rest Controller", "Java")
+    Container(kafka_adapter, "Kafka Adapter", "Java")
+    Container(service, "Service layer", "Java")
+    Container(component, "Component layer", "Java")
+    Container(repository, "Repository layer", "Java")
+}
+
+Rel(api_gateway, controller, "Read")
+Rel(kafka, kafka_adapter, "R/W")
+Rel(kafka_adapter, service, "R/W")
+Rel(controller, service, "R/W")
+Rel(service, component, "R/W")
+Rel(component, repository, "R/W")
+Rel(repository, mongodb, "R/W")
+
+Rel_R(controller, elk, "R/W")
+Rel_R(service, elk, "R/W")
+Rel_R(component, elk, "R/W")
+Rel_R(repository, elk, "R/W")
+
+Rel_R(controller, prometheus, "Write")
+
+SHOW_LEGEND()
+@enduml

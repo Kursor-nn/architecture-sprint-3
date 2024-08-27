@@ -1,14 +1,14 @@
 package ru.yandex.practicum.smarthome.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.smarthome.dto.ActionDto;
 import ru.yandex.practicum.smarthome.dto.DeviceDto;
 import ru.yandex.practicum.smarthome.exception.DataIsNotFound;
 import ru.yandex.practicum.smarthome.mapper.DataMapper;
 import ru.yandex.practicum.smarthome.repository.DeviceRepository;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +26,9 @@ public class DeviceService {
                 .orElseThrow(DataIsNotFound::new);
     }
 
-    public List<DeviceDto> getAll() {
-        return deviceRepository.findAll().stream().map(dataMapper::data2dto).toList();
+    public Page<DeviceDto> getAll(Pageable pageable) {
+        var page = deviceRepository.findAll(pageable);
+        return page.map(dataMapper::data2dto);
     }
 
     public void action(Long deviceId, ActionDto actionDto) {

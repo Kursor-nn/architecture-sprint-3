@@ -8,4 +8,7 @@ AddElementTag("notimplemented", $fontColor="red")
 AddElementTag("backup", $fontColor="orange")
 AddRelTag("backup", $textColor="orange", $lineColor="orange", $lineStyle = DashedLine())
 
+AddRelTag("database", $textColor="black", $lineStyle = DashedLine())
+AddRelTag("external", $lineStyle = DashedLine())
+
 @enduml
