@@ -7,6 +7,8 @@ import ru.yandex.practicum.smarthome.dto.ActionDto;
 import ru.yandex.practicum.smarthome.dto.DeviceDto;
 import ru.yandex.practicum.smarthome.service.DeviceService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 public class DeviceController {
@@ -15,6 +17,11 @@ public class DeviceController {
 
     public DeviceController(DeviceService deviceService) {
         this.deviceService = deviceService;
+    }
+
+    @GetMapping("/devices")
+    public ResponseEntity<List<DeviceDto>> getAll() {
+        return ResponseEntity.ok(deviceService.getAll());
     }
 
     @PostMapping("/devices")

@@ -182,6 +182,7 @@ services:
     volumes:
       - ./docs:/spec
     environment:
+      - CORS=true
       - SWAGGER_JSON=/spec/task_1.4_command_swagger.yaml
 
 volumes:

@@ -8,6 +8,8 @@ import ru.yandex.practicum.smarthome.exception.DataIsNotFound;
 import ru.yandex.practicum.smarthome.mapper.DataMapper;
 import ru.yandex.practicum.smarthome.repository.DeviceRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class DeviceService {
@@ -24,6 +26,9 @@ public class DeviceService {
                 .orElseThrow(DataIsNotFound::new);
     }
 
+    public List<DeviceDto> getAll() {
+        return deviceRepository.findAll().stream().map(dataMapper::data2dto).toList();
+    }
 
     public void action(Long deviceId, ActionDto actionDto) {
     }

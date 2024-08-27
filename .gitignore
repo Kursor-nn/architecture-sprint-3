@@ -193,3 +193,5 @@ build/
 tmp/
 task-*
 postgresdata
+log
+data
