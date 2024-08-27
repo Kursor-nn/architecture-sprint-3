@@ -195,3 +195,4 @@ task-*
 postgresdata
 log
 data
+config/zookeeper/log
