@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: telemetry-service
+  data:
+    mongodb:
+      uri: mongodb://prodmongodb:27017/telemetry
+
+  kafka:
+    bootstrap-servers: kafka:29092
+    consumer:
+      group-id: default-kafka-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      acks: all
+      retries: 3
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type: INFO
+
+kafka:
+  topic:
+    telemetry: telemetry-data-topic
+
+server:
+  port: 8080

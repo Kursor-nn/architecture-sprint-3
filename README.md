@@ -1,74 +1,67 @@
 # Базовая настройка
+Для запуска стенда:
+1. проверить что запущен Docker
+2. docker-compose up -d
+3. подождать инициализации стека
+3. для инициализации базовых устройств: 
+- init_dataset.sh 
+4. Swagger будет доступен по адресу http://localhost:8080/swagger-ui
 
-## Запуск minikube
+## Текущая реализация
+### Текущая функциональность приложения:
 
-[Инструкция по установке](https://minikube.sigs.k8s.io/docs/start/)
+- Получение конфигурации/обновление конфигурации отопления
+- Включение/отключение отопления
+- Получение текущей температуры
 
-```bash
-minikube start
-```
+### Домены монолитного приложения:
 
+- Конфигурация отопления
+- Сбор метрик температуры
 
-## Добавление токена авторизации GitHub
+### Должны быть учтены домены:
+- Регистрация устройств
+- Телеметрия
+- Данные пользователя
+- управление внешними устройствами
 
-[Получение токена](https://github.com/settings/tokens/new)
+------------
 
-```bash
-kubectl create secret docker-registry ghcr --docker-server=https://ghcr.io --docker-username=<github_username> --docker-password=<github_token> -n default
-```
+## ToBe
 
+# Описание системы
+## Компоненты системы
+### API Gateway
 
-## Установка API GW kusk
+API Gateway - реализует концепцию единой точки входа в систему
 
-[Install Kusk CLI](https://docs.kusk.io/getting-started/install-kusk-cli)
+### Input Device API
+Принимает данные от устройств, валидирует и отправляет в обработчики через кафку.
 
-```bash
-kusk cluster install
-```
+### Telemetry Service
 
+Собирает и предоставляет данные делеметрии по запросу
 
-## Настройка terraform
+### Device Registration Service
 
-[Установите Terraform](https://yandex.cloud/ru/docs/tutorials/infrastructure-management/terraform-quickstart#install-terraform)
+Сервис регистрации новых устройств в системе 
 
+### Kafka
 
-Создайте файл ~/.terraformrc
+Message bus - для хранения и транспортировки событий потребителям
 
-```hcl
-provider_installation {
-  network_mirror {
-    url = "https://terraform-mirror.yandexcloud.net/"
-    include = ["registry.terraform.io/*/*"]
-  }
-  direct {
-    exclude = ["registry.terraform.io/*/*"]
-  }
-}
-```
+### Описание текущего дизайна
+- [Контекст](docs%2F1_actual%2F1_context.puml)
+- [Контейнеры](docs%2F1_actual%2F2_container.puml)
 
-## Применяем terraform конфигурацию 
-
-```bash
-cd terraform
-terraform apply
-```
-
-## Настройка API GW
-
-```bash
-kusk deploy -i api.yaml
-```
-
-## Проверяем работоспособность
-
-```bash
-kubectl port-forward svc/kusk-gateway-envoy-fleet -n kusk-system 8080:80
-curl localhost:8080/hello
-```
-
-
-## Delete minikube
-
-```bash
-minikube delete
-```
+### Описание целевого дизайна
+* [Контекст](docs%2F2_future%2F1_context%2F1_context.puml)
+* [Контейнер](docs%2F2_future%2F2_container%2F2_container.puml)
+* Компоненты:
+  1. [API Gateway](docs%2F2_future%2F3_components%2F1_api_gateway.puml)
+  2. [Telemetry](docs%2F2_future%2F3_components%2F2_telemetry.puml)
+  3. [Device Registration Service](docs%2F2_future%2F3_components%2F3_device_registration_service.puml)
+  4. [Sensor Handler](docs%2F2_future%2F3_components%2F4_sensor_event_handler_service.puml)
+  5. [Boiler Handler](docs%2F2_future%2F3_components%2F5_boiler_event_handler_service.puml)
+* [Device Registration Service Code.puml](docs%2F2_future%2F4_code%2F1_device_registration_service.puml)
+* [ER Диаграмма](docs%2F2_future%2Ftask_1.3_er.puml)

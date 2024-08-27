@@ -1,0 +1,34 @@
+@startuml
+!include ../../common/C4_Context.puml
+!include ../../common/C4_Container.puml
+
+Container(kafka, "Kafka", "heating_topic", "boiler action")
+Container(elk, "ELK Stack", "Store logs")
+Container(prometheus, "Prometheus", "Store metrics")
+ContainerDb(database, "PostgreSql", "Database")
+
+Container_Ext(devices, "Boiler", "Heating system")
+
+Container_Boundary(temperature_container, "Temperature Handler") {
+    Container(kafka_adapter, "Kafka Adapter", "Java")
+    Container(service, "Service layer", "Java")
+    Container(component, "Component layer", "Java")
+    Container(repository, "Repository layer", "Java")
+}
+
+Rel(kafka, kafka_adapter, "R/W")
+Rel(kafka_adapter, service, "R/W")
+Rel(service, component, "R/W")
+Rel(component, repository, "R/W")
+Rel(repository, database, "R/W")
+
+Rel(service, elk, "R/W")
+Rel(component, elk, "R/W")
+Rel(repository, elk, "R/W")
+
+Rel(component, devices, "R/W", "Turn On/Off")
+
+Rel(kafka_adapter, prometheus, "Write")
+
+SHOW_LEGEND()
+@enduml

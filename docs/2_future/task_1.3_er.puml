@@ -1,0 +1,63 @@
+@startuml
+
+title Entity Diagram
+
+entity User {
+    * id - unique id
+    * login - user login
+    * password - user password hash
+    * active_token - current active token
+}
+
+entity Home {
+    * id - Уникальный идентификатор
+    * name - Название дома
+    * user_id - Идентификатор владельца
+    * avatar - URL для картинки ljvf
+}
+
+entity DeviceAction {
+    * id - unique id
+    * type_id - action type
+}
+
+entity Device {
+    * id - unique id
+    * type_id - device type
+    * home_id - home id
+    * serial - unique serial number
+    * actions - Device Actions
+}
+
+entity "DeviceType" {
+    * id - unique id
+    * name - name
+    * manufactory - device provider
+}
+
+entity DeviceData {
+    * id - unique id
+    * device_id - device id
+    * value_name - parameter
+    * value - paramter value
+    * created_at - data creation
+    * updated_at - update data
+    * default - default value
+}
+
+entity TelemetryData {
+    * id - unique id
+    * device_id - device id
+    * value_name - parameter
+    * value - paramter value
+    * datetime - moment at time
+}
+
+Home }o--|| User
+Device }o--|| Home
+Device ||--|| "DeviceType"
+"DeviceData" }o--|| Device
+"Device" }o--|| DeviceAction
+"Device" }o--|| TelemetryData
+
+@enduml

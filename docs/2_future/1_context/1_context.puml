@@ -1,0 +1,20 @@
+@startuml
+!include ../common/C4_Context.puml
+!include ../common/C4_Container.puml
+!include ../common/tags.puml
+
+title System Context
+
+Person(user, "User", "user")
+
+System(core_system, "Core system", "Control and monitoring system")
+
+System_Ext(sensor, "sensor", "sensors")
+System_Ext(devices, "devices", "devices")
+
+Rel(user, core_system, "Usecase", "System configuration")
+Rel_R(sensor, core_system, "Usecase", "Read/Write data", $tags="external")
+Rel_R(core_system, devices,"Usecase", "Read/Write data", $tags="external")
+
+SHOW_LEGEND()
+@enduml

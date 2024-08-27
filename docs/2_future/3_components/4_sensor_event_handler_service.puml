@@ -1,0 +1,37 @@
+@startuml
+!include ../../common/C4_Context.puml
+!include ../../common/C4_Container.puml
+
+Container_Ext(kafka, "Kafka", "temperature_topic", "temperature data")
+Container_Ext(kafka_output, "Kafka", "action", "Data to device handler services")
+Container_Ext(elk, "ELK Stack", "Store logs")
+Container_Ext(prometheus, "Prometheus", "Store metrics")
+Container_Ext(telemetry, "Telemetry", "Java, Spring", "Receive, store and provide metrics")
+ContainerDb(database, "PostgreSql", "Database")
+
+Container_Boundary(sensor_container, "Sensor Event Handler") {
+    Container(kafka_adapter, "Kafka Adapter", "Java")
+    Container(service, "Service layer", "Java")
+    Container(component, "Component layer", "Java")
+    Container(adapter_kafka, "Kafka Adapter", "Java")
+    Container(repository, "Repository layer", "Java")
+}
+
+Rel(kafka, kafka_adapter, "R/W")
+Rel(kafka_adapter, service, "R/W")
+Rel(service, component, "R/W")
+Rel(service, adapter_kafka, "R/W", "Send data to target topic with action")
+Rel(adapter_kafka, kafka_output, "R/W")
+Rel(component, repository, "R/W")
+Rel(repository, database, "R/W")
+
+Rel(service, elk, "R/W")
+Rel(component, elk, "R/W")
+Rel(component, telemetry, "W")
+Rel(repository, elk, "R/W")
+Rel(adapter_kafka, elk, "R/W")
+
+Rel(kafka_adapter, prometheus, "Write")
+
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,317 @@
+openapi: 3.0.3
+info:
+  title: Device Controller
+  description: Sync API Description
+  version: "0.0.1"
+tags:
+  - name: device
+    description: Device
+servers:
+  - url: http://localhost:80/
+    description: test server
+paths:
+  /devices:
+    get:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/pageNumber'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/offset'
+      summary: get devices
+      operationId: getAll
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResult"
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Device"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      summary: create new device
+      operationId: create
+      requestBody:
+        description: create new device
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Device"
+        required: true
+      responses:
+        201:
+          description: device is created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        400:
+          $ref: '#/components/responses/BadRequestError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+  /devices/{id}:
+    get:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      summary: get device info
+      operationId: get
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        200:
+          description: device info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+    delete:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      summary: Удалить устройство по его id
+      operationId: delete
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        200:
+          description: Delete device
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+  /devices/{id}/action:
+    post:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      summary: do action
+      operationId: doAction
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        description: Action parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Action'
+      responses:
+        200:
+          description: Command is accepted
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+  /devices/{id}/telemetry/latest:
+    get:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      summary: get devices
+      operationId: getLatest
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryData"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+  /devices/{id}/telemetry:
+    get:
+      tags:
+        - device
+      security:
+        - bearerAuth: [ ]
+      summary: get devices
+      operationId: getLatest
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResult"
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TelemetryData"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+components:
+  responses:
+    UnauthorizedError:
+      description: Токен доступа отсутсвует или не правильный
+    BadRequestError:
+      description: Не удалось разобрать запрос
+    ForbiddenError:
+      description: У пользователя нет доступа к операции
+    NotFoundError:
+      description: Запрошенный объект не найден
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    pageNumber:
+      in: query
+      name: page
+      schema:
+        type: integer
+        example: 0
+    pageSize:
+      in: query
+      name: size
+      schema:
+        type: integer
+        example: 10
+        default: 10
+    offset:
+      in: query
+      name: size
+      schema:
+        type: integer
+        example: 10
+        default: 0
+    id:
+      in: path
+      name: id
+      schema:
+        type: integer
+      required: true
+      description: object id
+  schemas:
+    Action:
+      type: object
+      properties:
+        command:
+          type: string
+          example: to_do_something
+    DeviceType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: "Some usefull device"
+        manufactory:
+          type: string
+          example: "aqara"
+    DeviceStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "in-work"
+        last_update:
+          type: datetime
+          example: "2024-08-24T12:00:00"
+    TelemetryData:
+      type: object
+      properties:
+        id:
+          type: number
+          example: "123"
+        device_id:
+          type: number
+          example: "456"
+        value_name:
+          type: number
+          example: "some_parameters"
+        value:
+          type: number
+          example: "1"
+        datetime:
+          type: datetime
+          example: "2024-08-24T12:00:00"
+    Device:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: "123456"
+          default: "123456"
+        type:
+          type: string
+          example: "temperature"
+          default: "temperature"
+        serialNumber:
+          type: string
+          example: "123345"
+          default: "123345"
+        modelName:
+          type: string
+          example: "amazing-model"
+          default: "amazing-model"
+        manufacturer:
+          type: string
+          example: "amazing-manufacturer"
+          default: "amazing-manufacturer"
+    PaginatedResult:
+      type: object
+      properties:
+        page: { type: number, example: 3 }
+        pages: { type: number, example: 5 }
+        size: { type: number, example: 20 }
+        total: { type: number, example: 100 }
+        results: { type: array, items: { } }
+
+security:
+  - bearerAuth: [ ]

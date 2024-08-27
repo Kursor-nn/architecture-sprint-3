@@ -1,0 +1,18 @@
+@startuml
+!include ../common/C4_Context.puml
+!include ../common/C4_Container.puml
+
+title System Context Diagram
+
+Person(user, "User", "System user")
+System(core_system, "Core System", "Configuration and monitoring")
+
+System_Ext(sensor, "sensor", "Sensors")
+System_Ext(devices, "devices", "Devices")
+
+Rel(user, core_system, "Uses", "Configuration and monitoring")
+Rel(core_system, sensor, "Uses", "Receive data from sensors")
+Rel(core_system, devices, "Uses", "Send data to devices")
+
+SHOW_LEGEND()
+@enduml
